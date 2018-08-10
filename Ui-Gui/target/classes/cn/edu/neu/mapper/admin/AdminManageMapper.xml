@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace：命名空间，其值为某一个dao层类的具体路径 -->
+<mapper namespace="cn.edu.neu.mapper.admin.AdminManageMapper">
+	<!-- sql语句保存在Mybatis的局部配置文件中 -->
+	<!-- select标签存放查询语句(List<User>) id:在整个配置文件中id值必须唯一，其值与dao层类中的方法名保持一致 resultType：指定当前sql查询语句返回的数据类型。类型不是为sql语句的最终类型，而是某一条数据的类型 -->
+	<select id="getSchools" resultType="cn.edu.neu.vo.schoolWithIdAndName">
+		select * from school;
+	</select>
+	<insert id="addSchool">
+		insert into school(schoolId,schoolName) values (null,#{schoolName});
+	</insert>
+	<delete id="deleteSchool" parameterType="java.lang.Integer">
+		delete from school where schoolId=#{schoolId};
+	</delete>
+	<update id="putSchool">
+		update school set schoolName = #{param2} where schoolId = #{param1};
+	</update>
+	
+	<!-- 嵌套查询School详细信息 -->
+	<select id="getSchoolById" parameterType="java.lang.Integer" resultMap="SchoolMap">
+		select schoolId, schoolName from school where schoolId=#{schoolId}; 
+	</select>
+	<resultMap type="cn.edu.neu.entity.School" id="SchoolMap">
+		<id column="schoolId" property="schoolId"/>
+		<result column="schoolName" property="schoolName"/>
+		<collection property="majors" ofType="cn.edu.neu.vo.MajorWithIdAndName" select="getMajors" column="schoolId"></collection>
+		<collection property="cabinetLocations" ofType="cn.edu.neu.vo.CabinetLocationWithIdAndName" select="getCabinetlocations" column="schoolId"></collection>
+	</resultMap>
+	<select id="getMajors" parameterType="java.lang.Integer" resultType="cn.edu.neu.vo.MajorWithIdAndName">
+		select majorId,majorName from major where schoolId = #{schoolId}
+	</select>
+	<select id="getCabinetlocations" parameterType="java.lang.Integer" resultType="cn.edu.neu.vo.CabinetLocationWithIdAndName">
+		select cabinetlocationId,cabinetlocationName from cabinetLocation where cabinetSchoolId = #{schoolId}
+	</select>
+	
+</mapper>

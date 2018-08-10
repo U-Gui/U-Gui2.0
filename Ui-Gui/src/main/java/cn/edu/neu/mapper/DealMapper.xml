@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.neu.mapper.DealMapper">
+	
+	<!-- 提供用户经常使用的柜子位置 -->
+	<!-- 获取用户经常使用的柜子位置 cabinetId-->
+	<select id="getCabinetIdOften" resultType="hashmap">
+		select distinct bi.cabinetId as cabinetId, count(1) as count from boxinfo bi 
+		where bi.boxId in (select bur.boxId from boxuserecord bur where bur.userId=#{userId}) 
+		group by bi.cabinetId order by count desc limit #{size}
+	</select>
+	<!-- 根据cabinetId,提供school、柜子地点，空闲柜子数量 -->
+	<select id="offCabinetInfoOften" parameterType="list" resultType="hashmap">
+		select c.cabinetId as localnumber, count(bi.boxStatus) as freenumber, cl.cabinetlocationName as location, s.schoolName as school 
+		from cabinet c, boxinfo bi, cabinetlocation cl, school s 
+		<where>
+			<if test="list!=null and list.size>0">
+				c.cabinetId in 
+				<foreach collection="list" open="(" close=")" item="tempmap" index="index" separator=",">
+					#{tempmap.cabinetId}
+				</foreach>
+			</if>
+			and bi.boxStatus = 0 and bi.cabinetId = c.cabinetId 
+			and cl.cabinetlocationId = c.cabinetLocationId 
+			and s.schoolId = cl.cabinetschoolid 
+			group by c.cabinetid
+		</where>
+	</select>
+	
+	<!-- 提供用户学校的所有柜子位置 ，用到startlocation和offsize-->
+	<!-- 得到用户学校柜子群id: 提供userid，返回cabinetlocationid-->
+	<select id="getUserSchoolCabLocIds" parameterType="string" resultType="int">
+		select cl.cabinetlocationid from cabinetlocation cl 
+		where cl.cabinetschoolid = (select m.schoolId from major m 
+		where m.majorId = (select u.userMajorId from user u where u.userId=#{userId}))
+	</select>
+	<!-- 根据cabinetlocationid，提供school、柜子地点，空闲柜子数量 -->
+	<select id="offgetCabinetInfoUserSchool" parameterType="map" resultType="hashmap">
+		select c.cabinetid as localnumber, count(bi.boxstatus) as freenumber, cl.cabinetlocationName as location, s.schoolname as school 
+		from cabinet c, boxinfo bi, cabinetlocation cl, school s
+		<where>
+			<if test="list!=null and list.size>0">
+				cl.cabinetlocationId in
+				<foreach collection="list" open="(" close=")" item="cabinetlocationId" index="index" separator=",">
+					#{cabinetlocationId}
+				</foreach>
+			</if>
+			and c.cabinetLocationId = cl.cabinetlocationId
+			and bi.boxStatus = 0 and bi.cabinetId = c.cabinetId
+			and s.schoolId = cl.cabinetSchoolId
+			group by c.cabinetId limit #{startLocation}, #{offSize}
+		</where>
+	</select>
+	
+	<!-- 返回所有柜子，根据startlocation和offsize -->
+	<select id="offCabinetInfoAll" resultType="hashmap">
+		select c.cabinetid as localnumber, count(bi.boxstatus) as freenumber, cl.cabinetlocationName as location, s.schoolname as school
+		from cabinet c, boxinfo bi, cabinetlocation cl, school s where 
+		bi.boxstatus = 0 and bi.cabinetId = c.cabinetId
+		and cl.cabinetlocationId = c.cabinetLocationId 
+		and s.schoolId = cl.cabinetschoolid 
+		group by c.cabinetid limit #{startLocation}, #{offSize}
+	</select>
+	
+	<!-- 根据选择提供柜子地点 -->
+	<!-- 提供所有有柜子的学校id -->
+	<!-- 没取的值在实体类里映射为null,用resultMap映射为[] -->
+	<select id="offAllSchoolHaveCabinet" resultMap="school_IN_map">
+		select distinct s.* from school s right join cabinetlocation cl on s.schoolId = cl.cabinetSchoolId
+	</select>
+	<resultMap type="school" id="school_IN_map">
+		<id property="schoolId" column="schoolId" jdbcType="INTEGER"/>
+		<result property="schoolName" column="schoolName" jdbcType="VARCHAR"/>
+		<collection property="majors" ofType="Major" column="schoolId"></collection>
+		<collection property="cabinetLocations" ofType="CabinetLocation" column="schoolId"></collection>
+	</resultMap>
+	<!-- 根据选择的学校id返回柜子群id及柜子群下的大柜子 -->
+	<select id="offCabinetLocbySchoolId" parameterType="int" resultType="hashmap">
+		select cl.cabinetlocationId, cl.cabinetlocationName, c.cabinetId, count(b.boxstatus) as midfree, 
+		(select count(b.boxstatus) from boxinfo b where b.cabinetid=c.cabinetid and b.boxstatus=0 and b.boxType=1) as bigfree 
+		from boxinfo b, cabinetlocation cl left join cabinet c 
+		on c.cabinetlocationId=cl.cabinetlocationId where cl.cabinetSchoolId=#{schoolId} 
+		and b.cabinetid=c.cabinetid and b.boxstatus=0 and b.boxType=0 group by c.cabinetId
+	</select>
+	
+	<!-- 大柜子里不同类型小柜子空闲数量 -->
+	<select id="offCabinetFreenum" parameterType="int" resultType="hashmap">
+		select count(1) as midfree, 
+		(select count(1) from boxInfo where cabinetId=#{cabinetId} and boxStatus=0 and boxType=1) as bigfree 
+		from boxinfo where cabinetId=#{cabinetId} and boxstatus=0 and boxtype=0
+	</select>
+
+	<!-- 为用户分配柜子 -->
+	<!-- 根据cabinetid，获得大柜子下 的小柜子 -->
+	<select id="getBoxbyCabinetId" parameterType="int" resultType="boxInfo">
+		select boxId, boxType from boxinfo where cabinetId=${value} and boxStatus=0
+	</select>
+	<!-- 根据cabinetid和型号获得小柜子 -->
+	<select id="getBoxbyCabinetandType" parameterType="int" resultType="int">
+		select boxId from boxinfo where cabinetId=#{param1, jdbcType=INTEGER} and boxStatus=0 and boxType=#{param2, jdbcType=INTEGER}
+	</select>
+	
+	<!-- 用户正要租用柜子 -->	
+	<!-- 获取用户钱、时长信息:id,balance,boxtime -->
+	<select id="getUserIBB" parameterType="string" resultType="user">
+		select userId, userBalance, userBoxtime from user where userId=#{userId}
+	</select>
+	<!-- 获取柜子信息：id, status -->
+	<select id="getBoxIS" parameterType="int" resultType="boxInfo">
+		select boxId, boxStatus from boxinfo where boxId=${value}
+	</select>
+	<!-- 改变柜子状态 -->
+	<update id="alterBoxStatus" parameterType="int">
+		update boxinfo set boxstatus=#{arg0, jdbcType=INTEGER} where boxId=#{arg1, jdbcType=INTEGER} 
+	</update>
+	<!-- 插入使用记录表 -->
+	<insert id="addBoxUseRecord" parameterType="boxUseRecord">
+		insert into BoxUseRecord (boxId, userId, start_time, end_time) 
+		values(#{boxInfo.boxId,jdbcType=INTEGER}, #{user.userId,jdbcType=INTEGER}, 
+			   #{start_time,jdbcType=BIGINT}, #{end_time,jdbcType=BIGINT})
+	</insert>
+	
+	<!-- 用户想要解除柜子 -->
+	<!-- 获取用户正在租用的所有柜子 用userid获取结束时间为0的 -->
+	<select id="offOnUseAll" parameterType="string" resultType="hashmap">
+		select  bur.start_time as start_time, bi.boxId as boxid, cl.cabinetlocationName as boxlocation, s.schoolName as boxschool  
+		from boxinfo bi, school s, cabinetlocation cl, boxuserecord bur where 
+		bur.userId=#{userId} and bur.end_time=0 and bi.boxId=bur.boxId and 
+		cl.cabinetlocationId in (select c.cabinetLocationId from cabinet c where c.cabinetId=bi.cabinetId)
+		and s.schoolId=cl.cabinetSchoolId
+	</select>
+	<!-- 修改用户时长 -->
+	<update id="alterUserBoxTime">
+		update user set userBoxtime=#{userBoxtime} where userId=#{userId}
+	</update>
+	<!-- 修改用户钱 -->
+	<update id="alterUserBalance">
+		update user set userBalance=#{userBalance} where userId=#{userId}
+	</update>
+	<!-- 改变使用记录结束时间  -->
+	<select id="alterUseEndTime">
+		update boxuserecord set end_time=${end_time} where boxId=${boxId} and end_time=0
+	</select>
+	
+	<!-- 根据userid和时间查找，获取用户剩余钱、剩余租柜子时间、签到天数。 -->
+	<select id="getUserBBSD" parameterType="string" resultType="user">
+		select userBalance, userBoxtime, usersignDays, lastsignTime from user where userId=#{userId}
+	</select>
+	
+</mapper>
