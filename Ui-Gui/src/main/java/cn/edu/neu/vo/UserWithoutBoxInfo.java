@@ -1,11 +1,12 @@
-package cn.edu.neu.entity;
+package cn.edu.neu.vo;
 
 import java.sql.Date;
 import java.util.List;
 
+import cn.edu.neu.entity.BoxUseRecord;
 import cn.edu.neu.vo.MajorWithIdAndName;
 
-public class User {
+public class UserWithoutBoxInfo {
 	private String userId;
 	private String userPhone;
 	private Integer userSex;
@@ -14,7 +15,6 @@ public class User {
 	private MajorWithIdAndName major;
 	private Integer usersignDays;
 	private Date lastsignTime;
-	private List<BoxUseRecord> boxUseRecords;
 	public String getUserId() {
 		return userId;
 	}
@@ -63,20 +63,14 @@ public class User {
 	public void setLastsignTime(Date lastsignTime) {
 		this.lastsignTime = lastsignTime;
 	}
-	public List<BoxUseRecord> getBoxUseRecords() {
-		return boxUseRecords;
-	}
-	public void setBoxUseRecords(List<BoxUseRecord> boxUseRecords) {
-		this.boxUseRecords = boxUseRecords;
-	}
 	@Override
 	public String toString() {
 		return "User [userId=" + userId + ", userPhone=" + userPhone + ", userSex=" + userSex + ", userBalance="
 				+ userBalance + ", userBoxtime=" + userBoxtime + ", usersignDays=" + usersignDays + ", lastsignTime="
-				+ lastsignTime + ", boxUseRecords=" + boxUseRecords + "]";
+				+ lastsignTime + "]";
 	}
-	public User(String userId, String userPhone, Integer userSex, double userBalance, long userBoxtime,
-			MajorWithIdAndName major, Integer usersignDays, Date lastsignTime, List<BoxUseRecord> boxUseRecords) {
+	public UserWithoutBoxInfo(String userId, String userPhone, Integer userSex, double userBalance, long userBoxtime,
+			MajorWithIdAndName major, Integer usersignDays, Date lastsignTime) {
 		super();
 		this.userId = userId;
 		this.userPhone = userPhone;
@@ -86,9 +80,8 @@ public class User {
 		this.major = major;
 		this.usersignDays = usersignDays;
 		this.lastsignTime = lastsignTime;
-		this.boxUseRecords = boxUseRecords;
 	}
-	public User() {
+	public UserWithoutBoxInfo() {
 		super();
 	}
 	

@@ -3,6 +3,8 @@ package cn.edu.neu.serviceImpl.admin;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +20,11 @@ public class AdminOptionsServiceImpl implements AdminOptionsService{
 	@Autowired
 	private AdminOptionsMapper adminOptionsMapper;
 	
-	public backJSON findAdmin(String adminId, String adminPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	public backJSON findAdmin(String adminId, String adminPassword,HttpSession session) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		adminPassword = ShaEncryptUtil.shaEncrypt(adminPassword);
 		Admin admin = adminOptionsMapper.findAdmin(adminId,adminPassword);
 		if(admin!=null) {
+			session.setAttribute("admin", admin);
 			return new backJSON(200,admin);
 		}else {
 			return new backJSON(2222,"信息验证失败，请重新登录！");

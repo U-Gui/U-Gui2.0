@@ -36,4 +36,145 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select cabinetlocationId,cabinetlocationName from cabinetLocation where cabinetSchoolId = #{schoolId}
 	</select>
 	
+	<!-- 添加专业 -->
+	<insert id="addMajor">
+		insert into major (majorId,majorName,schoolId) values (null,#{param2},#{param1});
+	</insert>
+	
+	<!-- 删除专业 -->
+	<delete id="deleteMajor" parameterType="java.lang.Integer">
+		delete from major where majorId=#{majorId}
+	</delete>
+	
+	<!-- 修改专业 -->
+	<update id="putMajor">
+		update major set majorName=#{param2} where majorId=#{param1};
+	</update>
+	
+	<!-- 添加柜子存放地点 -->
+	<insert id="addCabinetLocation">
+		insert into cabinetLocation values(null,#{param1},#{param2});
+	</insert>
+	
+	<!-- 删除柜子存放地点 -->
+	<delete id="deleteCabinetLocation" parameterType="java.lang.Integer">
+		delete from cabinetLocation where cabinetlocationId=#{cabinetlocationId}
+	</delete>
+	
+	<!-- 修改柜子存放地点 -->
+	<update id="putCabinetLocation">
+		update cabinetLocation set cabinetlocationName=#{param2} where cabinetlocationId=#{param1};
+	</update>
+	
+	<!-- 嵌套查询所有柜子信息 -->
+	<select id="getCabinetLocations" parameterType="java.lang.Integer" resultMap="CabinetLocationMap">
+		select cabinetlocationId,cabinetSchoolId,cabinetlocationName from cabinetLocation limit #{searchStartIndex},10;
+	</select>
+	<resultMap type="cn.edu.neu.entity.CabinetLocation" id="CabinetLocationMap">
+		<id column="cabinetlocationId" property="cabinetlocationId"/>
+		<result column="cabinetlocationName" property="cabinetlocationName"/>
+		<collection property="school" ofType="cn.edu.neu.vo.schoolWithIdAndName" select="getSchool" column="cabinetSchoolId"></collection>
+	</resultMap>
+	<select id="getSchool" parameterType="java.lang.Integer" resultType="cn.edu.neu.vo.schoolWithIdAndName">
+		select * from school where schoolId=#{cabinetSchoolId};
+	</select>
+	
+	<!-- 查询指定地点下的所有柜子，返回cabinetlocation对象 -->
+	<select id="getCabinetsByLocation" resultMap="getCabinetsByLocation">
+		select * from cabinetlocation where cabinetlocationId=#{param1} limit #{param2},10 ;
+	</select>
+	<resultMap type="cn.edu.neu.vo.CabinetLocationWithAll" id="getCabinetsByLocation">
+		<id column="cabinetlocationId" property="cabinetlocationId"/>
+		<result column="cabinetlocationName" property="cabinetlocationName"/>
+		<collection property="school" ofType="cn.edu.neu.vo.schoolWithIdAndName" select="getSchool" column="cabinetSchoolId"></collection>
+		<collection column="cabinetlocationId" property="cabinets" select="getCabinets"></collection>
+	</resultMap>
+	<select id="getCabinets" parameterType="java.lang.Integer" resultMap="getCabinetBoxs">
+		select * from cabinet where cabinetlocationId=#{cabinetlocationId};
+	</select>
+	<resultMap type="cn.edu.neu.vo.CabinetWithIdAndBoxs" id="getCabinetBoxs">
+		<id column="cabinetId" property="cabinetId"/>
+		<collection column="cabinetId" property="boxs" ofType="cn.edu.neu.vo.BoxWithIdAndStatusAndType" select="getBoxs"></collection>
+	</resultMap>
+	<select id="getBoxs" parameterType="java.lang.Integer" resultType="cn.edu.neu.vo.BoxWithIdAndStatusAndType">
+		select boxId,boxStatus,boxType from boxinfo where cabinetId=#{cabinetId};
+	</select>
+	
+	<!-- 在柜子地点添加柜子 -->
+	<insert id="addCabinet" parameterType="java.lang.Integer">
+		insert into cabinet values(null,#{cabinetlocationId});
+	</insert>
+
+	<!-- 在柜子地点删除柜子 -->
+	<delete id="deleteCabinet" parameterType="java.lang.Integer">
+		delete from cabinet where cabinetId=#{cabinetId};
+	</delete>
+
+	<!-- 给柜子添加小箱子 -->
+	<insert id="addBox">
+		insert into boxinfo values(null,#{param2},#{param3},#{param1});
+	</insert>
+	
+	<!-- 给柜子删除小箱子 -->
+	<delete id="deleteBox">
+		delete from boxinfo where boxId = #{boxId};
+	</delete>
+	
+	<!-- 给柜子修改小箱子信息 -->
+	<update id="putBox">
+		update boxinfo set boxStatus=#{param2}, boxType=#{param3} where boxId=#{param1};
+	</update>
+	
+	<!-- 删除箱子使用记录 -->
+	<delete id="deleteBoxUseRecord">
+		delete from boxuserecord where recordId = #{recordId};
+	</delete>
+	
+	<!-- 分页查看所有箱子使用记录 -->
+	<select id="getBoxUseRecords" parameterType="java.lang.Integer" resultMap="BoxUseRecordsMap">
+		select recordId,boxId,userId,start_time,end_time from boxuserecord limit #{searchStartIndex},10;
+	</select>
+	<resultMap type="cn.edu.neu.vo.BoxUseRecordWithoutBoxInfo" id="BoxUseRecordsMap">
+		<id column="recordId" property="recordId"/>
+		<result column="boxId" property="boxId"/>
+		<result column="start_time" property="start_time"/>
+		<result column="end_time" property="end_time"/>
+		<collection column="userId" property="user" ofType="cn.edu.neu.vo.UserWithIdAndPhone" select="getUser"></collection>
+	</resultMap>
+	<select id="getUser" parameterType="java.lang.String" resultType="cn.edu.neu.vo.UserWithIdAndPhone">
+		select userId,userPhone from user where userId=#{userId};
+	</select>
+	
+	<!-- 分页查看所有用户信息 -->
+	<select id="getUsers" parameterType="java.lang.Integer" resultType="cn.edu.neu.vo.UserWithoutMajorAndBoxUseRecord">
+		select * from user limit #{searchStartIndex},10;
+	</select>
+	
+	<!-- 查看用户详细信息 -->
+	<select id="getUserInfo" resultMap="UserInfoMap">
+		select * from user where userId = #{userId};
+	</select>
+	<resultMap id="UserInfoMap" type="cn.edu.neu.vo.UserWithoutBoxInfo">
+		<id column="userId" property="userId"/>
+		<result column="userPhone" property="userPhone"/>
+		<result column="userSex" property="userSex"/>
+		<result column="userBalance" property="userBalance"/>
+		<result column="userBoxtime" property="userBoxtime"/>
+		<result column="usersignDays" property="usersignDays"/>
+		<result column="lastsignTime" property="lastsignTime"/>
+		<collection column="userMajorId" property="major" ofType="cn.edu.neu.vo.MajorWithIdAndName" select="getMajor"></collection>
+	</resultMap>
+	<select id="getMajor" parameterType="java.lang.Integer" resultType="cn.edu.neu.vo.MajorWithIdAndName">
+		select majorId,majorName from major where majorId=#{majorId};
+	</select>
+	
+	<!-- 删除用户 -->
+	<delete id="deleteUser">
+		delete from user where userId=#{userId};
+	</delete>
+	
+	<!-- 修改用户 -->
+	<update id="putUser" parameterType="cn.edu.neu.vo.UserWithoutMajorAndBoxUseRecord">
+		update user set userPhone=#{userPhone},userSex=#{userSex},userBalance=#{userBalance},userBoxtime=#{userBoxtime},userMajorId=#{userMajorId},usersignDays=#{usersignDays},lastsignTime=#{lastsignTime} where userId=#{userId};
+	</update>
 </mapper>

@@ -19,4 +19,10 @@
 		<task:executor id="executor" keep-alive="3600" pool-size="100-200" queue-capacity="500" rejection-policy="CALLER_RUNS" /> 
 		<task:annotation-driven executor="executor" scheduler="scheduler" />
 		
+		<mvc:interceptors>
+			<mvc:interceptor>
+				<mvc:mapping path="/admin/manage/**" />
+				<bean class="cn.edu.neu.util.UserInterceptor" />
+			</mvc:interceptor>
+		</mvc:interceptors>
 </beans>

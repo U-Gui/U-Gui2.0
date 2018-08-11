@@ -3,6 +3,8 @@ package cn.edu.neu.controller.admin;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,9 +28,9 @@ public class AdminOptionsController {
 	//用户登录请求处理
 	@ResponseBody
 	@RequestMapping("/login")
-	public backJSON login(@RequestParam("adminId")String adminId,@RequestParam("adminPassword")String adminPassword) {
+	public backJSON login(@RequestParam("adminId")String adminId,@RequestParam("adminPassword")String adminPassword,HttpSession session) {
 		try {
-			return adminOptionService.findAdmin(adminId,adminPassword);
+			return adminOptionService.findAdmin(adminId,adminPassword,session);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {

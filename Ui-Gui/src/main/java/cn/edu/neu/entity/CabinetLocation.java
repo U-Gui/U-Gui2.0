@@ -2,41 +2,23 @@ package cn.edu.neu.entity;
 
 import java.util.List;
 
+import cn.edu.neu.vo.schoolWithIdAndName;
+
 public class CabinetLocation {
 	private Integer cabinetlocationId;
-	private School school;
+	private schoolWithIdAndName school;
 	private String cabinetlocationName;
 	private List<Cabinet> cabinets;
-	public CabinetLocation() {}
-	public CabinetLocation(Integer cabinetlocationId, School school, String cabinetlocationName) {
-		super();
-		this.cabinetlocationId = cabinetlocationId;
-		this.school = school;
-		this.cabinetlocationName = cabinetlocationName;
-	}
-	public CabinetLocation(Integer cabinetlocationId, School school, String cabinetlocationName, List<Cabinet> cabinets) {
-		super();
-		this.cabinetlocationId = cabinetlocationId;
-		this.school = school;
-		this.cabinetlocationName = cabinetlocationName;
-		this.cabinets = cabinets;
-	}
-	public CabinetLocation(Integer cabinetlocationId, String cabinetlocationName, List<Cabinet> cabinets) {
-		super();
-		this.cabinetlocationId = cabinetlocationId;
-		this.cabinetlocationName = cabinetlocationName;
-		this.cabinets = cabinets;
-	}
 	public Integer getCabinetlocationId() {
 		return cabinetlocationId;
 	}
 	public void setCabinetlocationId(Integer cabinetlocationId) {
 		this.cabinetlocationId = cabinetlocationId;
 	}
-	public School getSchool() {
+	public schoolWithIdAndName getSchool() {
 		return school;
 	}
-	public void setSchool(School school) {
+	public void setSchool(schoolWithIdAndName school) {
 		this.school = school;
 	}
 	public String getCabinetlocationName() {
@@ -50,5 +32,10 @@ public class CabinetLocation {
 	}
 	public void setCabinets(List<Cabinet> cabinets) {
 		this.cabinets = cabinets;
+	}
+	@Override
+	public String toString() {
+		return "CabinetLocation [cabinetlocationId=" + cabinetlocationId + ", school=" + school
+				+ ", cabinetlocationName=" + cabinetlocationName + ", cabinets=" + cabinets + "]";
 	}
 }
