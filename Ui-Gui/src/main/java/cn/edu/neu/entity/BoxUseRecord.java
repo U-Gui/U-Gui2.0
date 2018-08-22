@@ -10,6 +10,7 @@ public class BoxUseRecord {
 	private UserWithIdAndName user;
 	private Date start_time;
 	private Date end_time;
+	private User uuser;
 	public BoxUseRecord(Integer recordId, BoxInfo boxInfo, UserWithIdAndName user, Date start_time, Date end_time) {
 		super();
 		this.recordId = recordId;
@@ -17,6 +18,14 @@ public class BoxUseRecord {
 		this.user = user;
 		this.start_time = start_time;
 		this.end_time = end_time;
+	}
+
+	public BoxUseRecord(BoxInfo boxInfo, Date start_time, Date end_time, User uuser) {
+		super();
+		this.boxInfo = boxInfo;
+		this.start_time = start_time;
+		this.end_time = end_time;
+		this.uuser = uuser;
 	}
 
 	public Integer getRecordId() {
@@ -62,4 +71,13 @@ public class BoxUseRecord {
 	public BoxUseRecord() {
 		super();
 	}
+
+	public User getUuser() {
+		return uuser;
+	}
+
+	public void setUuser(User uuser) {
+		this.uuser = uuser;
+	}
+	
 }

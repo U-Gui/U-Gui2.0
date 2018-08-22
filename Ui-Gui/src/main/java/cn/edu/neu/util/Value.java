@@ -8,6 +8,8 @@ public class Value {
 	//签到奖励规则:每天签到一次给baseAward分钟，连续签到，增加奖励，第(x)天获得baseAward+x/(cycleAward)*baseAward（分钟）
 	private static final int baseAward = 100;
 	private static final int cycleAward = 5;
+	//用户第一次注册赠送免费租用时长，暂时设置为1天
+	private static final long signBoxtime = 86400000;
 	public static int getOffsize() {
 		return offSize;
 	}
@@ -21,6 +23,9 @@ public class Value {
 		return cycleAward;
 	}
 	public static int awardtime(int UsersignDays) {
-		return (1+(1+UsersignDays)/2*cycleAward)+baseAward*UsersignDays;
+		return baseAward+UsersignDays/cycleAward*baseAward;
+	}
+	public static long getSignboxtime() {
+		return signBoxtime;
 	}
 }

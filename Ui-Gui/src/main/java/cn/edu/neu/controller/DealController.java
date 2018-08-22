@@ -3,6 +3,7 @@ package cn.edu.neu.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,8 @@ import cn.edu.neu.entity.School;
 import cn.edu.neu.entity.User;
 import cn.edu.neu.service.DealService;
 import cn.edu.neu.util.Value;
+import cn.edu.neu.vo.MajorWithIdAndName;
+import cn.edu.neu.vo.schoolWithIdAndName;
 
 /**
  * @author bc
@@ -156,7 +159,7 @@ public class DealController {
 	/*
 	 * 用户打开柜子
 	 * 	改变状态
-	 * 	确认使用，移进记录表,设置结束时间为0
+	 * 	确认使用，移进记录表,设置结束时间为1970-01-01 08:00:00
 	 * 	不确认使用，返回状态
 	 */
 	@RequestMapping("/useropenbox")
@@ -192,10 +195,10 @@ public class DealController {
 		if(user!=null) {
 			result = 2;
 			BoxInfo boxInfo = dealService.getBoxIS(boxid);
-			if(boxInfo!=null) {
-				long start_time = System.currentTimeMillis();
-				long end_time = 0;
-				BoxUseRecord boxUseRecord = new BoxUseRecord(boxInfo, user, start_time, end_time);
+			if(boxInfo!=null&&boxInfo.getBoxStatus()==1) {
+				java.util.Date start_time = new java.util.Date(System.currentTimeMillis());
+				java.util.Date end_time = new java.util.Date(0);
+				BoxUseRecord boxUseRecord = new BoxUseRecord(boxInfo,start_time, end_time, user);
 				dealService.addBoxUseRecord(boxUseRecord);
 				result = 0;
 			}
@@ -261,14 +264,12 @@ public class DealController {
 			}
 		}
 		if(ifEnough&&ifOpen) {
-			dealService.alterUseEndTime(end_time, boxid);
+			dealService.alterUseEndTime(new Timestamp(end_time), boxid);
 			dealService.alterBoxStatus(0, boxid);
 		}
 		resultMap.put("ifopen", ifOpen);
 		resultMap.put("ifenough", ifEnough);
 		resultMap.put("payway", payWay);
-		resultMap.put("stat_time", start_time);
-		resultMap.put("end_time", end_time);
 		resultMap.put("paytime", payTime);
 		resultMap.put("paymoney", payMoney);
 		return resultMap;
@@ -306,7 +307,14 @@ public class DealController {
 		}
 		return resultMap;
 	}
-	
+	@RequestMapping("/getallschool")
+	public @ResponseBody List<schoolWithIdAndName> offAllSchool() {
+		return dealService.getAllSchool();
+	}
+	@RequestMapping("/getallmajor")
+	public @ResponseBody List<MajorWithIdAndName> offAllMajor(int schoolId) {
+		return dealService.getAllMajorbySchoolId(schoolId);
+	}
 	
 }
 

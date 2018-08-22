@@ -116,17 +116,17 @@
 	<!-- 插入使用记录表 -->
 	<insert id="addBoxUseRecord" parameterType="boxUseRecord">
 		insert into BoxUseRecord (boxId, userId, start_time, end_time) 
-		values(#{boxInfo.boxId,jdbcType=INTEGER}, #{user.userId,jdbcType=INTEGER}, 
-			   #{start_time,jdbcType=BIGINT}, #{end_time,jdbcType=BIGINT})
+		values(#{boxInfo.boxId,jdbcType=INTEGER}, #{uuser.userId,jdbcType=INTEGER}, 
+			   #{start_time}, #{end_time})
 	</insert>
 	
 	<!-- 用户想要解除柜子 -->
 	<!-- 获取用户正在租用的所有柜子 用userid获取结束时间为0的 -->
 	<select id="offOnUseAll" parameterType="string" resultType="hashmap">
 		select  bur.start_time as start_time, bi.boxId as boxid, cl.cabinetlocationName as boxlocation, s.schoolName as boxschool  
-		from boxinfo bi, school s, cabinetlocation cl, boxuserecord bur where 
-		bur.userId=#{userId} and bur.end_time=0 and bi.boxId=bur.boxId and 
-		cl.cabinetlocationId in (select c.cabinetLocationId from cabinet c where c.cabinetId=bi.cabinetId)
+		from boxinfo bi, school s, cabinetlocation cl, boxuserecord bur 
+		where bur.userId=#{userId} and DATE_FORMAT(bur.end_time,'%Y')='1970' and bi.boxId=bur.boxId 
+		and	cl.cabinetlocationId in (select c.cabinetLocationId from cabinet c where c.cabinetId=bi.cabinetId)
 		and s.schoolId=cl.cabinetSchoolId
 	</select>
 	<!-- 修改用户时长 -->
@@ -138,13 +138,21 @@
 		update user set userBalance=#{userBalance} where userId=#{userId}
 	</update>
 	<!-- 改变使用记录结束时间  -->
-	<select id="alterUseEndTime">
-		update boxuserecord set end_time=${end_time} where boxId=${boxId} and end_time=0
-	</select>
+	<update id="alterUseEndTime">
+		update boxuserecord set end_time=#{end_time} where boxId=#{boxId} and DATE_FORMAT(end_time,'%Y')='1970'
+	</update>
 	
 	<!-- 根据userid和时间查找，获取用户剩余钱、剩余租柜子时间、签到天数。 -->
 	<select id="getUserBBSD" parameterType="string" resultType="user">
 		select userBalance, userBoxtime, usersignDays, lastsignTime from user where userId=#{userId}
+	</select>
+	
+	<!-- 获取所有学校，根据学校id获取所有专业 -->
+	<select id="getAllSchool" resultType="cn.edu.neu.vo.schoolWithIdAndName">
+		select * from school
+	</select>
+	<select id="getAllMajorbySchoolId" parameterType="int" resultType="cn.edu.neu.vo.MajorWithIdAndName">
+		select majorId, majorName from major where schoolId=${value}
 	</select>
 	
 </mapper>

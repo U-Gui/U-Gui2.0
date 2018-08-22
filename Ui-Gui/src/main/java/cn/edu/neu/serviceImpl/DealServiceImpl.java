@@ -1,5 +1,6 @@
 package cn.edu.neu.serviceImpl;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import cn.edu.neu.entity.School;
 import cn.edu.neu.entity.User;
 import cn.edu.neu.mapper.DealMapper;
 import cn.edu.neu.service.DealService;
+import cn.edu.neu.vo.MajorWithIdAndName;
+import cn.edu.neu.vo.schoolWithIdAndName;
 
 @Service
 public class DealServiceImpl implements DealService {
@@ -70,12 +73,17 @@ public class DealServiceImpl implements DealService {
 	public void alterUserBalance(double userBalance, String userId) {
 		dealMapper.alterUserBalance(userBalance, userId);
 	}
-	public void alterUseEndTime(long end_time, int boxId) {
+	public void alterUseEndTime(Timestamp end_time, int boxId) {
 		dealMapper.alterUseEndTime(end_time, boxId);
 	}
 	public User getUserBBSD(String userId) {
 		return dealMapper.getUserBBSD(userId);
 	}
-	
+	public List<schoolWithIdAndName> getAllSchool() {
+		return dealMapper.getAllSchool();
+	}
+	public List<MajorWithIdAndName> getAllMajorbySchoolId(int schoolId) {
+		return dealMapper.getAllMajorbySchoolId(schoolId);
+	}
 
 }
