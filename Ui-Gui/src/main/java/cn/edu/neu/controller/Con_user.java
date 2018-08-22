@@ -17,6 +17,7 @@ import cn.edu.neu.entity.User;
 import cn.edu.neu.service.userservice;
 import cn.edu.neu.util.Value;
 import cn.edu.neu.util.wxlogin;
+import cn.edu.neu.vo.UserDefaultIBBDT;
 
 @Controller
 @RequestMapping(value = "user")
@@ -64,6 +65,12 @@ public class Con_user {
 	 * 
 	 * 
 	 */
+	/*
+	 * 增加
+	 * 2018.8.21
+	 * author: bc
+	 * 为用户信息赋初值
+	 */
 	@RequestMapping(value = "register")
 	@ResponseBody
 	public Map<String, Boolean> register(String userId, String userPhone, int userMajorId, Integer userSex) {
@@ -71,7 +78,18 @@ public class Con_user {
 
 		try {
 			us.registeruserbyuserId(userId, userPhone, userMajorId, userSex);
-
+			/*
+			 * 2018.8.22
+			 * bc修改
+			 * 为用户一些信息赋初值
+			 * userBalance：钱--0.0
+			 * userBoxtime：租用柜子时长--注册赠送
+			 * usersignDays: 签到天数--0
+			 * lastsignTime：上一次签到时间--1970-01-01
+			 */
+			long signBoxtime = Value.getSignboxtime();
+			java.sql.Date lastsignTime = new java.sql.Date(0);
+			us.addUserDefaultInfo(new UserDefaultIBBDT(userId, 0.0, signBoxtime, 0, lastsignTime));
 			result.put("result", true);
 			return result;
 		} catch (Exception e) {

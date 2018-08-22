@@ -1,5 +1,6 @@
 package cn.edu.neu.mapper;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,8 @@ import cn.edu.neu.entity.BoxInfo;
 import cn.edu.neu.entity.BoxUseRecord;
 import cn.edu.neu.entity.School;
 import cn.edu.neu.entity.User;
+import cn.edu.neu.vo.MajorWithIdAndName;
+import cn.edu.neu.vo.schoolWithIdAndName;
 
 public interface DealMapper {
 	
@@ -29,7 +32,9 @@ public interface DealMapper {
 	List<Map<String, Object>> offOnUseAll(String userId);
 	void alterUserBoxTime(@Param("userBoxtime")long userBoxTime, @Param("userId")String userId);
 	void alterUserBalance(@Param("userBalance")double userBalance, @Param("userId")String userId);
-	void alterUseEndTime(@Param("end_time")long end_time, @Param("boxId")int boxId);
+	void alterUseEndTime(@Param("end_time")Timestamp end_time, @Param("boxId")int boxId);
 	User getUserBBSD(@Param("userId")String userId);
+	List<schoolWithIdAndName> getAllSchool();
+	List<MajorWithIdAndName> getAllMajorbySchoolId(int schoolId);
 	
 }

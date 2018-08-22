@@ -24,7 +24,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		parameterType="cn.edu.neu.entity.User">
 		UPDATE `user`
 		<set>
-			<if test="user.userSex>=0">
+			<if test="user.userSex!=null and user.userSex>=0">
 				userSex=#{user.userSex},
 			</if>
 			<if test="user.userPhone != null and user.userPhone != ''">
@@ -37,10 +37,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</set>
 		WHERE userId=#{user.userId}
 	</update>
-	<select id="getuserallrecord" resultType="Map"
+	<!-- 2018.8.22  bc修改  增加时间判断，只取租用过的，正在租用的不算 -->
+	<select id="getuserallrecord" resultType="map"
 		parameterType="cn.edu.neu.entity.BoxUseRecord">
-		SELECT * FROM boxuserecord
-		where userId = #{user.userId}
+		SELECT bur.boxId, bur.start_time, bur.end_time FROM boxuserecord bur
+		where bur.userId = #{uuser.userId}
+		and (DATE_FORMAT(bur.end_time,'%Y-%m-%d') between '1970-01-02' and DATE_FORMAT(CURDATE(),'%Y-%m-%d'))
 	</select>
 	<update id="updateusersign">
 		UPDATE `user` SET usersignDays=#{usersignDays}
@@ -51,5 +53,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		WHERE userId=#{userId}
 	</update>
 
+	<!-- 2018.8.20 bc 为用户一些信息赋初值，详见controller层 -->
+	<update id="addUserDefaultInfo" parameterType="cn.edu.neu.vo.UserDefaultIBBDT">
+		update user set userBalance=#{userBalance, jdbcType=DECIMAL}, userBoxtime=#{userBoxtime, jdbcType=BIGINT},
+		usersignDays=#{usersignDays, jdbcType=INTEGER}, lastsignTime=#{lastsignTime, jdbcType=DATE} where userId=#{userId}
+	</update>
 
 </mapper>

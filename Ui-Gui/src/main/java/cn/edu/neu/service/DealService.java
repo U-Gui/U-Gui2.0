@@ -1,5 +1,6 @@
 package cn.edu.neu.service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,8 @@ import cn.edu.neu.entity.BoxInfo;
 import cn.edu.neu.entity.BoxUseRecord;
 import cn.edu.neu.entity.School;
 import cn.edu.neu.entity.User;
+import cn.edu.neu.vo.MajorWithIdAndName;
+import cn.edu.neu.vo.schoolWithIdAndName;
 
 
 public interface DealService {
@@ -28,7 +31,9 @@ public interface DealService {
 	public List<Map<String, Object>> offOnUseAll(String userId);
 	public void alterUserBoxTime(long userBoxTime, String userId);
 	public void alterUserBalance(double userBalance, String userId);
-	public void alterUseEndTime(long end_time, int boxId);
+	public void alterUseEndTime(Timestamp end_time, int boxId);
 	public User getUserBBSD(String userId);
+	public List<schoolWithIdAndName> getAllSchool();
+	public List<MajorWithIdAndName> getAllMajorbySchoolId(int schoolId);
 	
 }

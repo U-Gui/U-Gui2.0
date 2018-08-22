@@ -1,9 +1,9 @@
 package cn.edu.neu.serviceImpl;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +11,7 @@ import cn.edu.neu.entity.BoxUseRecord;
 import cn.edu.neu.entity.User;
 import cn.edu.neu.mapper.usermapper;
 import cn.edu.neu.service.userservice;
+import cn.edu.neu.vo.UserDefaultIBBDT;
 
 
 @Service
@@ -46,7 +47,7 @@ public class userserviceImpl implements userservice {
 	}
 
 
-	public Map<String, Object> getuserallrecord(BoxUseRecord bur){
+	public List<Map<String, Object>> getuserallrecord(BoxUseRecord bur){
 		return user.getuserallrecord(bur);
 	}
 
@@ -59,6 +60,11 @@ public class userserviceImpl implements userservice {
 
 	public int usersignlasttime(String userId,Date lastsignTime) {
 		return user.usersignlasttime(userId, lastsignTime);
+	}
+
+
+	public void addUserDefaultInfo(UserDefaultIBBDT userDefault) {
+		user.addUserDefaultInfo(userDefault);
 	}
 
 

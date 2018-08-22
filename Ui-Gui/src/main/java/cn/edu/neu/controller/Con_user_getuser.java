@@ -1,6 +1,6 @@
 package cn.edu.neu.controller;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,17 +30,16 @@ public class Con_user_getuser {
 	@RequestMapping("allrecord")
 	@ResponseBody
 
-	public Map<String, Object> allrecord(User user) {
+	/*
+	 * 2018.8.22
+	 * bc修改
+	 * 返回结果，原来的Map,应该为List<Map>,每个人不只一条记录
+	 */
+	public List<Map<String, Object>> allrecord(User user) {
 		BoxUseRecord BUR = new BoxUseRecord();
-		Map<String, Object> result = new HashMap<String, Object>();
-		BUR.setUser(user);
-		System.out.println("+++++" + BUR);
+		BUR.setUuser(user);
 		try {
-			result = us.getuserallrecord(BUR);
-			System.out.println("-----" + result);
-			result.remove("userId");
-			result.remove("recordId");
-			return result;
+			return us.getuserallrecord(BUR);
 		} catch (Exception e) {
 			return null;
 		}
