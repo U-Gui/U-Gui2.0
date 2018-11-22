@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -21,6 +22,7 @@ import cn.edu.neu.entity.BoxUseRecord;
 import cn.edu.neu.entity.School;
 import cn.edu.neu.entity.User;
 import cn.edu.neu.service.DealService;
+import cn.edu.neu.util.OpenBox;
 import cn.edu.neu.util.Value;
 import cn.edu.neu.vo.MajorWithIdAndName;
 import cn.edu.neu.vo.schoolWithIdAndName;
@@ -172,8 +174,10 @@ public class DealController {
 			result = 2;
 			BoxInfo boxInfo = dealService.getBoxIS(boxid);
 			if(boxInfo.getBoxStatus()==0) {
-				dealService.alterBoxStatus(1, boxid);
-				result = 0;
+				if(OpenBox.openBox(boxid)) {  //打开柜子，现在是根据是否连接上硬件端服务器判断是否正确
+					dealService.alterBoxStatus(1, boxid);
+					result = 0;
+				}
 			}
 		}
 		data = "{\"result\":"+result+"}";
@@ -220,68 +224,89 @@ public class DealController {
 	/*
 	 * 解除柜子
 	 * 	先获取所有正在租用的柜子，选择要打开的柜子
-	 * 	确认打开，
+	 * 	临时打开柜子
+	 * 	最终确认打开，不再使用
 	 * 		1.默认使用剩余时长支付时间
 	 * 		2.时长不够使用剩余钱支付
-	 * 	时长钱都不够->支付超出的时间: 暂缓
 	 */
 	@RequestMapping("/onuse/all")
 	@ResponseBody
 	public List<Map<String, Object>> offOnuseAll(String userid) {
 		return dealService.offOnUseAll(userid);
 	}
+	@PostMapping("/tempOpenBox")
+	public void tempOpenBox(String userid, int boxid, HttpServletResponse response) {
+		response.setContentType("application/json");
+		String data = "{\"result\":0}";
+		if(dealService.ifUseExist(userid, boxid)) {
+			if(OpenBox.openBox(boxid))   //打开柜子，现在是判断是否连接上硬件端服务器
+				data = "{\"result\":1}";
+		}
+		try {
+			PrintWriter writer = response.getWriter();
+			writer.print(data);
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	@RequestMapping("/opencomfirm")
 	@ResponseBody
 	public Map<String, Object> openConfrim(String userid, int boxid, long start_time) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		//时长或者钱是否够，开柜子是否成功
-		boolean ifEnough = false, ifOpen = false;
-		int payWay = 0;
-		User user = dealService.getUserIBB(userid);
-		long haveTime = user.getUserBoxtime();
-		long end_time = System.currentTimeMillis();
-		long payTime = end_time-start_time;
-		double haveBalance, payMoney = 0;
-		if(haveTime>=payTime) {
-			//开柜子
-			ifOpen = true;
-			if(ifOpen) {
-				dealService.alterUserBoxTime((haveTime-payTime), userid);
-				ifEnough = true;
-				payWay = 1;
-			}
-		}else {
-			haveBalance = user.getUserBalance();
-			payMoney = payTime/3600000*Value.getTime2money();
-			if(haveBalance>=payMoney) {
-				//开柜子
-				ifOpen = true;
-				if(ifOpen) {
-					dealService.alterUserBalance((haveBalance-payMoney), userid);
+		if(dealService.ifUseExist(userid, boxid)) {
+			//时长或者钱是否够，开柜子是否成功
+			boolean ifEnough = false, ifOpen = false;
+			int payWay = 0;
+			User user = dealService.getUserIBB(userid);
+			long haveTime = user.getUserBoxtime();
+			long end_time = System.currentTimeMillis();
+			long payTime = end_time-start_time;
+			double haveBalance, payMoney = 0.0;
+			if(haveTime>=payTime) {
+				if((ifOpen=OpenBox.openBox(boxid))) {  //打开柜子
+					dealService.alterUserBoxTime((haveTime-payTime), userid);
+					payWay = 1;
 					ifEnough = true;
-					payWay = 2;
 				}
+			} else {
+				haveBalance = user.getUserBalance();
+				payMoney = payTime/3600000*Value.getTime2money();
+				if(haveBalance>=payMoney) {
+					if((ifOpen=OpenBox.openBox(boxid))) {  //打开柜子
+						dealService.alterUserBalance((haveBalance-payMoney), userid);
+						ifEnough = true;
+						payWay = 2;
+					}
+				} else 
+					payMoney -= haveBalance;
 			}
+			if(ifEnough&&ifOpen) {
+				dealService.alterUseEndTime(new Timestamp(end_time), boxid);
+				dealService.alterBoxStatus(0, boxid);
+			}
+			resultMap.put("ifopen", ifOpen);
+			resultMap.put("ifenough", ifEnough);
+			resultMap.put("payway", payWay);
+			resultMap.put("paytime", payTime);
+			resultMap.put("paymoney", payMoney);
 		}
-		if(ifEnough&&ifOpen) {
-			dealService.alterUseEndTime(new Timestamp(end_time), boxid);
-			dealService.alterBoxStatus(0, boxid);
-		}
-		resultMap.put("ifopen", ifOpen);
-		resultMap.put("ifenough", ifEnough);
-		resultMap.put("payway", payWay);
-		resultMap.put("paytime", payTime);
-		resultMap.put("paymoney", payMoney);
 		return resultMap;
 	}
-	@RequestMapping("/payovertime")
-	@ResponseBody
-	public Map<String, Object> payOverTime() {
-//		if(ifEnough) {
-//			dealService.alterUseEndTime(end_time, boxid);
-//		}
-		return null;
+	/*
+	 * 用户支付超额时间后，自动打开柜子，要前端在用户确认支付的同时，触发这个url，打开柜子
+	 * 可以加系统延时
+	 * 这个方法暂时先这样，可以根据需求再改
+	 * 不知道微信会多久给回复，如果后端回复很快的话，可以在微信回复的时候开柜子，传递的needMoney可以设置为  money-boxid,以打开柜子 
+	 */
+	@RequestMapping("/payOpenBox")
+	public void payOverTime(int boxid) {
+		if(OpenBox.openBox(boxid)) {
+			dealService.alterUseEndTime(new Timestamp(System.currentTimeMillis()), boxid);
+			dealService.alterBoxStatus(0, boxid);
+		}
 	}
+	
 	//根据userid获取钱，剩余租柜子时长，签到天数，上一次签到时间
 	//根据奖励规则，计算获得时长
 	@RequestMapping("/getuser/moneytime")

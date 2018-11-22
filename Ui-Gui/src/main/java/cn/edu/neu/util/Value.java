@@ -10,6 +10,48 @@ public class Value {
 	private static final int cycleAward = 5;
 	//用户第一次注册赠送免费租用时长，暂时设置为1天
 	private static final long signBoxtime = 86400000;
+	
+	//硬件服务器IP地址，用户名，密码
+	private static final String boxOpenUrl = "";
+	private static final String boxOpenUser = "";
+	private static final String boxOpenPassword = "";
+	
+	//支付相关
+	//小程序ID
+	private static final String appid = "";
+	//商户号
+	private static final String mch_id = "";
+	//终端IP
+	private static final String spbill_create_ip = "";
+	//接收支付结果通知的地址
+	private static final String notify_url = "http://"+spbill_create_ip+":8080/Ui-Gui/pay/resultNotify";
+	//商户平台秘钥
+	private static final String secret_key = "";
+	
+	public static String getSecretKey() {
+		return secret_key;
+	}
+	public static String getAppid() {
+		return appid;
+	}
+	public static String getMchId() {
+		return mch_id;
+	}
+	public static String getSpbillCreateIp() {
+		return spbill_create_ip;
+	}
+	public static String getNotifyUrl() {
+		return notify_url;
+	}
+	public static String getBoxopenurl() {
+		return boxOpenUrl;
+	}
+	public static String getBoxopenuser() {
+		return boxOpenUser;
+	}
+	public static String getBoxopenpassword() {
+		return boxOpenPassword;
+	}
 	public static int getOffsize() {
 		return offSize;
 	}

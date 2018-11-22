@@ -223,6 +223,18 @@
 		    <artifactId>fastjson</artifactId>
 		    <version>1.2.47</version>
 		</dependency>
+		<!-- 连接到SSH服务器-->
+		<dependency>
+		    <groupId>ch.ethz.ganymed</groupId>
+		    <artifactId>ganymed-ssh2</artifactId>
+		    <version>build210</version>
+		</dependency>
+		<!-- 微信支付工具 -->
+		<dependency>
+		    <groupId>com.github.wxpay</groupId>
+		    <artifactId>wxpay-sdk</artifactId>
+		    <version>0.0.3</version>
+		</dependency>
 		
   </dependencies>
   <build>

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.neu.entity.BoxInfo;
 import cn.edu.neu.entity.BoxUseRecord;
+import cn.edu.neu.entity.PayRecord;
 import cn.edu.neu.entity.School;
 import cn.edu.neu.entity.User;
 import cn.edu.neu.mapper.DealMapper;
@@ -67,11 +68,21 @@ public class DealServiceImpl implements DealService {
 	public List<Map<String, Object>> offOnUseAll(String userId) {
 		return dealMapper.offOnUseAll(userId);
 	}
+	public boolean ifUseExist(String userid, int boxid) {
+		if(dealMapper.ifUseExist(userid, boxid)==null)
+			return false;
+		return true;
+	}
 	public void alterUserBoxTime(long userBoxTime, String userId) {
 		dealMapper.alterUserBoxTime(userBoxTime, userId);
 	}
 	public void alterUserBalance(double userBalance, String userId) {
 		dealMapper.alterUserBalance(userBalance, userId);
+	}
+	public boolean payUpdateBalance(double money, String userid) {
+		if((dealMapper.payUpdateBalance(money, userid))==1)
+			return true;
+		return false;
 	}
 	public void alterUseEndTime(Timestamp end_time, int boxId) {
 		dealMapper.alterUseEndTime(end_time, boxId);
@@ -84,6 +95,19 @@ public class DealServiceImpl implements DealService {
 	}
 	public List<MajorWithIdAndName> getAllMajorbySchoolId(int schoolId) {
 		return dealMapper.getAllMajorbySchoolId(schoolId);
+	}
+	public boolean newPayRecord(PayRecord payRecord) {
+		if(dealMapper.newPayRecord(payRecord)==1)
+			return true;
+		return false;
+	}
+	public Map<String, Object> getPayTotalfee(String openid, String out_trade_no) {
+		return dealMapper.getPayTotalfee(openid, out_trade_no);
+	}
+	public boolean updatePayRecord(String bank_type, String transaction_id, String time_end, String out_trade_no) {
+		if(dealMapper.updatePayRecord(bank_type, transaction_id, time_end, out_trade_no)==1)
+			return true;
+		return false;
 	}
 
 }

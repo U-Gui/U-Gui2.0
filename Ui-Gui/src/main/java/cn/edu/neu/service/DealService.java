@@ -6,6 +6,7 @@ import java.util.Map;
 
 import cn.edu.neu.entity.BoxInfo;
 import cn.edu.neu.entity.BoxUseRecord;
+import cn.edu.neu.entity.PayRecord;
 import cn.edu.neu.entity.School;
 import cn.edu.neu.entity.User;
 import cn.edu.neu.vo.MajorWithIdAndName;
@@ -29,11 +30,16 @@ public interface DealService {
 	public void alterBoxStatus(int boxStatus, int boxId);
 	public void addBoxUseRecord(BoxUseRecord boxUseRecord);
 	public List<Map<String, Object>> offOnUseAll(String userId);
+	public boolean ifUseExist(String userid, int boxid);
 	public void alterUserBoxTime(long userBoxTime, String userId);
 	public void alterUserBalance(double userBalance, String userId);
+	public boolean payUpdateBalance(double money, String userid);
 	public void alterUseEndTime(Timestamp end_time, int boxId);
 	public User getUserBBSD(String userId);
 	public List<schoolWithIdAndName> getAllSchool();
 	public List<MajorWithIdAndName> getAllMajorbySchoolId(int schoolId);
+	boolean newPayRecord(PayRecord payRecord);
+	Map<String, Object> getPayTotalfee(String openid, String out_trade_no);
+	boolean updatePayRecord(String bank_type, String transaction_id, String time_end, String out_trade_no);
 	
 }

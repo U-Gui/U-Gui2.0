@@ -129,6 +129,11 @@
 		and	cl.cabinetlocationId in (select c.cabinetLocationId from cabinet c where c.cabinetId=bi.cabinetId)
 		and s.schoolId=cl.cabinetSchoolId
 	</select>
+	<!-- 根据userid和boxid判断是否有对应记录 -->
+	<select id="ifUseExist" resultType="int">
+		SELECT 1 FROM BOXUSERECORD WHERE USERID=#{param1} AND BOXID=#{param2} AND DATE_FORMAT(END_TIME, '%Y')='1970'
+	</select>
+	
 	<!-- 修改用户时长 -->
 	<update id="alterUserBoxTime">
 		update user set userBoxtime=#{userBoxtime} where userId=#{userId}
@@ -137,6 +142,10 @@
 	<update id="alterUserBalance">
 		update user set userBalance=#{userBalance} where userId=#{userId}
 	</update>
+	<update id="payUpdateBalance" parameterType="int">
+		update user set userBalance = userBalance + (#{money}) where userId = #{userId}
+	</update>
+	
 	<!-- 改变使用记录结束时间  -->
 	<update id="alterUseEndTime">
 		update boxuserecord set end_time=#{end_time} where boxId=#{boxId} and DATE_FORMAT(end_time,'%Y')='1970'
@@ -154,5 +163,21 @@
 	<select id="getAllMajorbySchoolId" parameterType="int" resultType="cn.edu.neu.vo.MajorWithIdAndName">
 		select majorId, majorName from major where schoolId=${value}
 	</select>
+	
+	<!-- 充值：统一下单时插入一条交易记录 -->
+	<insert id="newPayRecord" parameterType="payRecord">
+		insert into PayRecord(openid, total_fee, overtime_money, out_trade_no, body, nofity_status) values
+		(#{openId, jdbcType=VARCHAR}, #{totalFee, jdbcType=INTEGER}, #{overtimeMoney, jdbcType=DECIMAL}, 
+		 #{outTradeNo, jdbcType=VARCHAR}, #{body, jdbcType=VARCHAR}, #{nofityStatus, jdbcType=INTEGER})
+	</insert>
+	<!-- 充值：取出支付的钱 -->
+	<select id="getPayTotalfee" resultType="int">
+		select total_fee, nofity_status, overtime_money from PayRecord where openid=#{param1} and out_trade_no=#{param2}
+	</select>
+	<!-- 更新交易记录 -->
+	<update id="updatePayRecord">
+		update PayRecord set bank_type=#{arg0}, transaction_id=#{arg1}, time_end=#{arg2}, nofity_status=1 
+		where out_trade_no=#{arg3}
+	</update>
 	
 </mapper>
