@@ -41,5 +41,6 @@ public interface DealService {
 	boolean newPayRecord(PayRecord payRecord);
 	Map<String, Object> getPayTotalfee(String openid, String out_trade_no);
 	boolean updatePayRecord(String bank_type, String transaction_id, String time_end, String out_trade_no);
+	boolean ifUserIn(String userId);
 	
 }

@@ -85,11 +85,24 @@ public class Con_user {
 			 * userBalance：钱--0.0
 			 * userBoxtime：租用柜子时长--注册赠送
 			 * usersignDays: 签到天数--0
-			 * lastsignTime：上一次签到时间--1970-01-01
+			 * lastsignTime：上一次签到时间--当前时间
 			 */
 			long signBoxtime = Value.getSignboxtime();
-			java.sql.Date lastsignTime = new java.sql.Date(0);
-			us.addUserDefaultInfo(new UserDefaultIBBDT(userId, 0.0, signBoxtime, 0, lastsignTime));
+			java.sql.Date lastsignTime = new java.sql.Date(System.currentTimeMillis());
+//			us.addUserDefaultInfo(new UserDefaultIBBDT(userId, 0.0, signBoxtime, 0, lastsignTime));
+			
+			
+			/*
+			 * ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+			 * ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+			 * 这里是为了测试，没有支付功能时，默认给用户很多钱
+			 * 正式上线要删掉，换成上面的
+			 * ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+			 * ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+			 */
+			us.addUserDefaultInfo(new UserDefaultIBBDT(userId, 1000.00, signBoxtime*10, 0, lastsignTime));
+			
+			
 			result.put("result", true);
 			return result;
 		} catch (Exception e) {

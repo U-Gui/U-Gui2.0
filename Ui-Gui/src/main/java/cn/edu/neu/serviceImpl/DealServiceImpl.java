@@ -109,5 +109,8 @@ public class DealServiceImpl implements DealService {
 			return true;
 		return false;
 	}
+	public boolean ifUserIn(String userId) {
+		return (dealMapper.ifUserIn(userId)==1);
+	}
 
 }

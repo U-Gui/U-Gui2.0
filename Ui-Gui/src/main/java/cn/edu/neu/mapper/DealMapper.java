@@ -42,5 +42,6 @@ public interface DealMapper {
 	int newPayRecord(PayRecord payRecord);
 	Map<String, Object> getPayTotalfee(String openid, String out_trade_no);
 	int updatePayRecord(String bank_type, String transaction_id, String time_end, String out_trade_no);
+	int ifUserIn(String userId);
 	
 }

@@ -6,6 +6,7 @@ import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 
 /**
+ * 暂时用不上了，用了另一种方法
  * 打开柜子工具类
  * 连接硬件端服务器，执行shell
  * @author bc

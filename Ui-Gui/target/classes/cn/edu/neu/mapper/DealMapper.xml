@@ -86,7 +86,7 @@
 	<!-- 大柜子里不同类型小柜子空闲数量 -->
 	<select id="offCabinetFreenum" parameterType="int" resultType="hashmap">
 		select count(1) as midfree, 
-		(select count(1) from boxInfo where cabinetId=#{cabinetId} and boxStatus=0 and boxType=1) as bigfree 
+		(select count(1) from boxinfo where cabinetId=#{cabinetId} and boxStatus=0 and boxType=1) as bigfree 
 		from boxinfo where cabinetId=#{cabinetId} and boxstatus=0 and boxtype=0
 	</select>
 
@@ -115,7 +115,7 @@
 	</update>
 	<!-- 插入使用记录表 -->
 	<insert id="addBoxUseRecord" parameterType="boxUseRecord">
-		insert into BoxUseRecord (boxId, userId, start_time, end_time) 
+		insert into boxuserecord (boxId, userId, start_time, end_time) 
 		values(#{boxInfo.boxId,jdbcType=INTEGER}, #{uuser.userId,jdbcType=INTEGER}, 
 			   #{start_time}, #{end_time})
 	</insert>
@@ -131,7 +131,7 @@
 	</select>
 	<!-- 根据userid和boxid判断是否有对应记录 -->
 	<select id="ifUseExist" resultType="int">
-		SELECT 1 FROM BOXUSERECORD WHERE USERID=#{param1} AND BOXID=#{param2} AND DATE_FORMAT(END_TIME, '%Y')='1970'
+		SELECT 1 FROM boxuserecord WHERE USERID=#{param1} AND BOXID=#{param2} AND DATE_FORMAT(END_TIME, '%Y')='1970'
 	</select>
 	
 	<!-- 修改用户时长 -->
@@ -166,18 +166,24 @@
 	
 	<!-- 充值：统一下单时插入一条交易记录 -->
 	<insert id="newPayRecord" parameterType="payRecord">
-		insert into PayRecord(openid, total_fee, overtime_money, out_trade_no, body, nofity_status) values
+		insert into payrecord(openid, total_fee, overtime_money, out_trade_no, body, nofity_status) values
 		(#{openId, jdbcType=VARCHAR}, #{totalFee, jdbcType=INTEGER}, #{overtimeMoney, jdbcType=DECIMAL}, 
 		 #{outTradeNo, jdbcType=VARCHAR}, #{body, jdbcType=VARCHAR}, #{nofityStatus, jdbcType=INTEGER})
 	</insert>
 	<!-- 充值：取出支付的钱 -->
 	<select id="getPayTotalfee" resultType="int">
-		select total_fee, nofity_status, overtime_money from PayRecord where openid=#{param1} and out_trade_no=#{param2}
+		select total_fee, nofity_status, overtime_money from payrecord where openid=#{param1} and out_trade_no=#{param2}
 	</select>
 	<!-- 更新交易记录 -->
 	<update id="updatePayRecord">
-		update PayRecord set bank_type=#{arg0}, transaction_id=#{arg1}, time_end=#{arg2}, nofity_status=1 
+		update payrecord set bank_type=#{arg0}, transaction_id=#{arg1}, time_end=#{arg2}, nofity_status=1 
 		where out_trade_no=#{arg3}
 	</update>
+	
+	<!-- 判断用户是否存在 -->
+	<select id="ifUserIn">
+		select 1 from user where userId = #{userId}
+	</select>
+	
 	
 </mapper>

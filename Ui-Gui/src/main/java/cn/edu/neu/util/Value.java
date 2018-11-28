@@ -1,9 +1,13 @@
 package cn.edu.neu.util;
 
 public class Value {
+	
+	//备份数据库地址
+	private static final String backupUGDBPath = "";
+	
 	//主页里用户每次浏览的柜子
 	private static final int offSize = 6;
-	//设置时间转换钱的大小：eg:一个小时多少钱？
+	//设置时间转换钱的大小：eg:一个小时多少元？
 	private static final double time2money = 0.1;
 	//签到奖励规则:每天签到一次给baseAward分钟，连续签到，增加奖励，第(x)天获得baseAward+x/(cycleAward)*baseAward（分钟）
 	private static final int baseAward = 100;
@@ -11,10 +15,6 @@ public class Value {
 	//用户第一次注册赠送免费租用时长，暂时设置为1天
 	private static final long signBoxtime = 86400000;
 	
-	//硬件服务器IP地址，用户名，密码
-	private static final String boxOpenUrl = "";
-	private static final String boxOpenUser = "";
-	private static final String boxOpenPassword = "";
 	
 	//支付相关
 	//小程序ID
@@ -28,6 +28,17 @@ public class Value {
 	//商户平台秘钥
 	private static final String secret_key = "";
 	
+	
+	//硬件服务器IP地址，用户名，密码
+	private static final String boxOpenUrl = "";
+	private static final String boxOpenUser = "";
+	private static final String boxOpenPassword = "";
+	
+	
+	
+	public static String getBackupugdbpath() {
+		return backupUGDBPath;
+	}
 	public static String getSecretKey() {
 		return secret_key;
 	}

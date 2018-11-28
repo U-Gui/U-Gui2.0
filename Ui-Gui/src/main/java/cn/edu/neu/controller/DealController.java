@@ -160,7 +160,7 @@ public class DealController {
 	}
 	/*
 	 * 用户打开柜子
-	 * 	改变状态
+	 * 	改变状态  0->9
 	 * 	确认使用，移进记录表,设置结束时间为1970-01-01 08:00:00
 	 * 	不确认使用，返回状态
 	 */
@@ -169,15 +169,16 @@ public class DealController {
 		int result = 1;
 		String data = null;
 		PrintWriter writer;
-		User user = dealService.getUserIBB(userid);
-		if(user!=null) {
+		if(dealService.ifUserIn(userid)) {
 			result = 2;
 			BoxInfo boxInfo = dealService.getBoxIS(boxid);
 			if(boxInfo.getBoxStatus()==0) {
-				if(OpenBox.openBox(boxid)) {  //打开柜子，现在是根据是否连接上硬件端服务器判断是否正确
+				/*if(OpenBox.openBox(boxid)) {  //打开柜子，现在是根据是否连接上硬件端服务器判断是否正确
 					dealService.alterBoxStatus(1, boxid);
 					result = 0;
-				}
+				}*/
+				dealService.alterBoxStatus(9, boxid);  //改变柜子为待改变状态9
+				result = 0;
 			}
 		}
 		data = "{\"result\":"+result+"}";
@@ -239,8 +240,9 @@ public class DealController {
 		response.setContentType("application/json");
 		String data = "{\"result\":0}";
 		if(dealService.ifUseExist(userid, boxid)) {
-			if(OpenBox.openBox(boxid))   //打开柜子，现在是判断是否连接上硬件端服务器
-				data = "{\"result\":1}";
+//			if(OpenBox.openBox(boxid))   //打开柜子，现在是判断是否连接上硬件端服务器
+			dealService.alterBoxStatus(9, boxid);   //设置为待打开状态9
+			data = "{\"result\":1}";
 		}
 		try {
 			PrintWriter writer = response.getWriter();
@@ -264,26 +266,26 @@ public class DealController {
 			long payTime = end_time-start_time;
 			double haveBalance, payMoney = 0.0;
 			if(haveTime>=payTime) {
-				if((ifOpen=OpenBox.openBox(boxid))) {  //打开柜子
+//				if((ifOpen=OpenBox.openBox(boxid))) {  //打开柜子
 					dealService.alterUserBoxTime((haveTime-payTime), userid);
 					payWay = 1;
 					ifEnough = true;
-				}
+//				}
 			} else {
 				haveBalance = user.getUserBalance();
 				payMoney = payTime/3600000*Value.getTime2money();
 				if(haveBalance>=payMoney) {
-					if((ifOpen=OpenBox.openBox(boxid))) {  //打开柜子
+//					if((ifOpen=OpenBox.openBox(boxid))) {  //打开柜子
 						dealService.alterUserBalance((haveBalance-payMoney), userid);
 						ifEnough = true;
 						payWay = 2;
-					}
+//					}
 				} else 
 					payMoney -= haveBalance;
 			}
 			if(ifEnough&&ifOpen) {
 				dealService.alterUseEndTime(new Timestamp(end_time), boxid);
-				dealService.alterBoxStatus(0, boxid);
+				dealService.alterBoxStatus(8, boxid);   //改变为待打开状态
 			}
 			resultMap.put("ifopen", ifOpen);
 			resultMap.put("ifenough", ifEnough);
@@ -303,7 +305,7 @@ public class DealController {
 	public void payOverTime(int boxid) {
 		if(OpenBox.openBox(boxid)) {
 			dealService.alterUseEndTime(new Timestamp(System.currentTimeMillis()), boxid);
-			dealService.alterBoxStatus(0, boxid);
+			dealService.alterBoxStatus(8, boxid);   //改变为待打开状态
 		}
 	}
 	
